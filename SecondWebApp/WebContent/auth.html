@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en" ng-app="restWebApp">
+  <head>
+    <meta charset="utf-8">
+    <title>Inventory</title>
+	<script type="text/javascript" src="lib/angular.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link href="./css/style.css" rel="stylesheet" type="text/css"/>
+  <script type="text/javascript">
+	  var restWebApp = angular.module('restWebApp', []);
+	
+	  restWebApp.controller('AuthController', function AuthController($scope, $http, $window, $httpParamSerializerJQLike) {
+	  	var vm = $scope;
+
+	  	vm.user = {};
+	  	
+	  	vm.submit = function() {
+	  	    $http({
+	  	      	url: 'http://localhost:8080/RestWebApp/rest/authentication',
+	  	    	method: 'POST',
+	  	    	data: $httpParamSerializerJQLike(vm.user), // Make sure to inject the service you choose to the controller
+	  	    	headers: {'Content-Type': 'application/x-www-form-urlencoded'} // Note the appropriate header
+	  	       })
+		      .then(function (res) {
+		        $window.sessionStorage.token = res.data;
+		        vm.user = {};
+		        console.log('Welcome');
+		      },
+		      function (res) {
+		          // Erase the token if the user fails to log in
+		          delete $window.sessionStorage.token;
+
+		          // Handle login errors here
+		          console.log('Error: Invalid user or password');
+		      });
+	  	};
+
+	    vm.callRestricted = function () {
+			var url = 'http://localhost:8080/RestWebApp/rest/inventory/customer';
+
+	        $http({
+		        url: url, 
+		        method: 'GET'
+			})
+		    .then(function (res) {
+		          console.log(res);
+		          console.log("good");
+		      },
+		      function (res) {
+			      console.log(res);
+		          console.log("error");
+		      });
+	      };
+	  	
+
+	  });
+
+	  restWebApp.factory('authInterceptor', function ($rootScope, $q, $window) {
+		  return {
+		    request: function (config) {
+		      config.headers = config.headers || {};
+		      if ($window.sessionStorage.token) {
+		        config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
+		        config.withCredentials = true;
+		      }
+		      return config;
+		    },
+		    response: function (response) {
+		      if (response.status === 401) {
+		        // handle the case where the user is not authenticated
+			       $window.alert("Not Authenticated!");
+		      }
+		      return response || $q.when(response);
+		    }
+		  };
+		});
+
+	  restWebApp.config(function ($httpProvider, $sceDelegateProvider) {
+		  
+		  $httpProvider.interceptors.push('authInterceptor');
+
+		  $httpProvider.defaults.useXDomain = true;
+// 		  delete $httpProvider.defaults.headers.common['X-Requested-With'];
+// 		  $httpProvider.defaults.headers.common["Accept"] = "application/json";
+// 		  $httpProvider.defaults.headers.common["Content-Type"] = "application/json";
+		  
+		  $sceDelegateProvider.resourceUrlWhitelist([
+              // Allow same origin resource loads.
+              'self',
+              // Allow loading from our assets domain.  Notice the difference between * and **.
+              'http://localhost:8080/**'
+          ]);
+
+          // The blacklist overrides the whitelist so the open redirect here is blocked.
+          $sceDelegateProvider.resourceUrlBlacklist([
+          'http://myapp.example.com/clickThru**'
+          ]);
+		  
+		});
+
+  </script>
+  </head>
+  <body ng-controller="AuthController">
+	
+    <div class="container">
+
+      <form ng-submit="submit()" class="form-signin">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <label for="username" class="sr-only">Email address</label>
+        <input ng-model="user.username" type="text" name="username" placeholder="Username" class="form-control" autofocus>
+        <label for="password" class="sr-only">Password</label>
+        <input ng-model="user.password" type="password" name="password" placeholder="Password" class="form-control" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+      
+      <a ng-click="callRestricted()" href="">Call Service</a>
+
+    </div> <!-- /container -->
+
+  </body>
+</html>

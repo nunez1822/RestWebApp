@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" ng-app="restWebApp">
+  <head>
+    <meta charset="utf-8">
+    <title>Inventory</title>
+	<script type="text/javascript" src="lib/angular.min.js"></script>
+	<script type="text/javascript" src="js/inventory.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body ng-controller="InventoryController">
+	<form>
+		<button type="button" ng-click="getAllActors()">Get Actors</button>
+		<select ng-model="url" ng-click="resetData()">
+			<option value="/RestWebApp/rest/inventory/actor">Actors</option>
+			<option value="/RestWebApp/rest/inventory/customer">Customers</option>
+		</select>
+		
+		<table class="table table-bordered" ng-show="url == '/RestWebApp/rest/inventory/actor'">
+		    <thead>
+		        <tr>
+		            <th>ActorID</th>
+		            <th>FirstName</th>
+		            <th>LastName</th>
+		            <th>LastUpdate</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		        <tr ng-repeat="d in data">
+		        	<td>{{d.actorId}}</td>
+		            <td>{{d.firstName}}</td>
+		            <td>{{d.lastName}}</td>
+		            <td>{{d.lastUpdate}}</td>
+		        </tr>
+		    </tbody>
+		</table>
+		<table class="table table-bordered" ng-show="url == '/RestWebApp/rest/inventory/customer'">
+		    <thead>
+		        <tr>
+		            <th>CustomerId</th>
+		            <th>Email</th>
+		            <th>FirstName</th>
+		            <th>LastName</th>
+		            <th>LastUpdate</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		        <tr ng-repeat="d in data">
+		        	<td>{{d.customerId}}</td>
+		        	<td>{{d.email}}</td>
+		            <td>{{d.firstName}}</td>
+		            <td>{{d.lastName}}</td>
+		            <td>{{d.lastUpdate}}</td>
+		        </tr>
+		    </tbody>
+		</table>
+	</form>
+
+  </body>
+</html>
